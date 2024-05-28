@@ -7,13 +7,31 @@ The business logic implements a simple sessionization pipeline. The choice was d
 
 You can go with Python (`python-project`) or Scala (`scala-project`) example. You can play with the code in two ways:
 
-* either see the running application; it requires starting the Docker containers with Apache Kafka and the data generator by running
+* either directly see the tests; for that you can run them from CLI or directly from your IDE
+
+* or see the running application; it requires starting the Docker containers with Apache Kafka and the data generator by running
 ```
 cd docker
 docker-compose down --volumes; docker-compose up
 ```
 
-* or directly see the tests; for that you can run them from CLI or directly from your IDE
+Next, start the job by setting the input parameters up for Scala...
+```
+--kafkaBootstrapServers localhost:9094 --kafkaInputTopic visits \
+--kafkaOutputTopic sessions --devicesTableLocation /tmp/dais2024/devices \
+--checkpointLocation /tmp/dais24_checkpoint/
+```
+
+...or Python:
+```
+--kafka_bootstrap_servers localhost:9094 --kafka_input_topic visits --kafka_output_topic sessions --devices_table_location /tmp/dais2024/devices --checkpoint_location /tmp/dais24_checkpoint/
+```
+
+For debugging purposes, you can connect to the Apache Kafka container with:
+```
+docker exec dais_24_kafka kafka-console-consumer.sh --topic sessions --bootstrap-server localhost:9092
+```
+
 
 ## Linkable resources mentioned in the talk's summary
 * Streaming: The world beyond batch, [part 1](https://www.oreilly.com/radar/the-world-beyond-batch-streaming-101/), [part 2](https://www.oreilly.com/radar/the-world-beyond-batch-streaming-102/) by Tyler Akidau
