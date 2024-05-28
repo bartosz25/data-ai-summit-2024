@@ -28,7 +28,8 @@ class SessionsGenerationJobLogicNoWatermarkPassedByTest extends AnyFlatSpec with
     val dataToAssertManager = new DataToAssertWriterReader(sparkSession)
 
     val visitsReader = sparkSession.readStream.schema("value STRING").json(datasetWriter.outputDir)
-    val sessionsWriter = generateSessions(visitsReader, devicesToTest, Trigger.ProcessingTime(0L))
+    val sessionsWriter = generateSessions(visitsReader, devicesToTest, Trigger.ProcessingTime(0L),
+      datasetWriter.checkpointDir)
     val startedQuery = sessionsWriter.foreachBatch(dataToAssertManager.writeMicroBatch _).start()
 
     startedQuery.processAllAvailable()
@@ -47,7 +48,7 @@ class SessionsGenerationJobLogicNoWatermarkPassedByTest extends AnyFlatSpec with
     startedQuery.processAllAvailable()
     val emittedSessions_2 = dataToAssertManager.getResultsForMicroBatch(2)
     emittedSessions_2 shouldBe empty
-    val emittedSessions_3 = dataToAssertManager.getResultsForMicroBatch(3)
+    val emittedSessions_3 = dataToAssertManager.getResultsForTheLastMicroBatch
     emittedSessions_3 shouldBe empty
   }
 

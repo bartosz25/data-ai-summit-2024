@@ -36,7 +36,8 @@ object SessionsGenerationJob {
         val devicesTable = sparkSession.read.format("delta").load(jobConfig.devicesDeltaTableLocation)
 
         val sessionsWriter: DataStreamWriter[Row] = SessionsGenerationJobLogic.generateSessions(
-          inputDataStream, devicesTable, ProcessingTimeTrigger("10 seconds")
+          inputDataStream, devicesTable, ProcessingTimeTrigger("10 seconds"),
+          jobConfig.checkpointLocation
         )
 
         val writerQuery = sessionsWriter.options(Map(

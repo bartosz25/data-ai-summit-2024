@@ -17,4 +17,14 @@ class DataToAssertWriterReader(sparkSession: SparkSession) {
 
   def getResultsForMicroBatch(microBatch: Long): Seq[String] = resultsPerMicroBatch(microBatch)
 
+  /**
+   * @return Results for the last micro-batch. We're relying on it because sometimes Spark executed two queries
+   *         instead of one, where only the last one does the cleaning. Hence, instead of getting
+   *         two queries after each processAllAvailable call, we get three.
+   *         It looks like a weird race condition between the processAllAvailable() and the state cleaning process.
+   *
+   *         As a result, using the direct number-based fetch, leads to flaky tests.
+   */
+  def getResultsForTheLastMicroBatch: Seq[String] = resultsPerMicroBatch.last._2
+
 }

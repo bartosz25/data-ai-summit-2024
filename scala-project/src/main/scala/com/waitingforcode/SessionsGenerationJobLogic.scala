@@ -6,7 +6,7 @@ import org.apache.spark.sql.{DataFrame, Dataset, Row, functions => F}
 object SessionsGenerationJobLogic {
 
   def generateSessions(visitsSource: DataFrame, devices: DataFrame,
-                        trigger: Trigger): DataStreamWriter[Row] = {
+                        trigger: Trigger, checkpointLocation: String): DataStreamWriter[Row] = {
     import visitsSource.sparkSession.implicits._
 
     val rawVisits = Reader.selectRawVisits(visitsSource).as[Visit]
@@ -26,7 +26,7 @@ object SessionsGenerationJobLogic {
       .withColumn("key", F.col("visit_id"))
       .select("key", "value")
 
-    Writer.setUpSessionsWriter(sessionsToWrite, trigger)
+    Writer.setUpSessionsWriter(sessionsToWrite, trigger).option("checkpointLocation", checkpointLocation)
   }
 
 }

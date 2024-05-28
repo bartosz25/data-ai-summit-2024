@@ -9,6 +9,8 @@ class DatasetWriter(val outputDir: String) {
 
   FileUtils.deleteDirectory(new File(outputDir))
 
+  val checkpointDir = s"${outputDir}/checkpoint"
+
   def writeDataFrame(dataFrame: DataFrame): Unit = {
     dataFrame.write.mode(SaveMode.Append).json(outputDir)
   }

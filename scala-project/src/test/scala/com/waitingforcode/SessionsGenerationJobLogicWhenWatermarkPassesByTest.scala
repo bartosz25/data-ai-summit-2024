@@ -27,7 +27,8 @@ class SessionsGenerationJobLogicWhenWatermarkPassesByTest extends AnyFlatSpec wi
     val dataToAssertManager = new DataToAssertWriterReader(sparkSession)
 
     val visitsReader = sparkSession.readStream.schema("value STRING").json(datasetWriter.outputDir)
-    val sessionsWriter = generateSessions(visitsReader, devicesToTest, Trigger.ProcessingTime(0L))
+    val sessionsWriter = generateSessions(visitsReader, devicesToTest, Trigger.ProcessingTime(0L),
+      datasetWriter.checkpointDir)
     val startedQuery = sessionsWriter.foreachBatch(dataToAssertManager.writeMicroBatch _).start()
 
     startedQuery.processAllAvailable()
@@ -57,7 +58,7 @@ class SessionsGenerationJobLogicWhenWatermarkPassesByTest extends AnyFlatSpec wi
     startedQuery.processAllAvailable()
     val emittedSessions_4 = dataToAssertManager.getResultsForMicroBatch(4)
     emittedSessions_4 shouldBe empty
-    val emittedSessions_5 = dataToAssertManager.getResultsForMicroBatch(5)
+    val emittedSessions_5 = dataToAssertManager.getResultsForTheLastMicroBatch
     emittedSessions_5 should have size 2
     val sessionsToAssert = fromJsonToSession(emittedSessions_5).groupBy(session => session.visit_id)
     Differs.SessionDiffer.assertNoDiff(
